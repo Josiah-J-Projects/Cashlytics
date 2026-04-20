@@ -43,7 +43,7 @@ export function Sidebar({ open, onClose }) {
         <div className="sidebarFooter">
           <div style={{ fontSize: 11, color: 'var(--gray-600)' }}>
             <TrendingUp size={12} style={{ display: 'inline', marginRight: 4 }} />
-            Your finances, simplified
+            Your Finances, Simplified
           </div>
         </div>
       </nav>
