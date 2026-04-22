@@ -297,7 +297,7 @@ export const fmt = (n, compact = false) => {
 }
 
 export const FREQ_LABELS = {
-  once: 'One-time', daily: 'Daily', weekly: 'Weekly',
+  once: 'One time', daily: 'Daily', weekly: 'Weekly',
   biweekly: 'Bi-weekly', monthly: 'Monthly', quarterly: 'Quarterly', annually: 'Annually',
 }
 
