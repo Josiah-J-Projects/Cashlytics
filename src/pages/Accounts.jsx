@@ -5,8 +5,10 @@ import { DraggableList } from '../components/DraggableList.jsx'
 import { Wallet, Plus, ChevronDown, ChevronUp, Edit2, Trash2, TrendingUp, AlertCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react'
 import { monthlyAmount } from '../store/index.js'
 
+//check form fields
 function validate(form, type) {
   const errs = {}
+  //check name
   if (!form.name?.trim()) errs.name = 'Name is required'
   if (type === 'account' && (form.balance === '' || isNaN(parseFloat(form.balance ?? '')))) errs.balance = 'Balance is required'
   if (type === 'income') {
@@ -15,7 +17,7 @@ function validate(form, type) {
   }
   return errs
 }
-
+//account card
 function AccountCard({ account, onEdit, onDelete, transactions, handle }) {
   const [expanded, setExpanded] = useState(false)
   const acctTxs = transactions.filter(t => t.accountId === account.id).sort((a,b) => new Date(b.date)-new Date(a.date))
@@ -37,6 +39,7 @@ function AccountCard({ account, onEdit, onDelete, transactions, handle }) {
         </div>
         {expanded ? <ChevronUp size={16} color="var(--gray-400)" /> : <ChevronDown size={16} color="var(--gray-400)" />}
       </div>
+      {/*expanded transaction list*/}
       {expanded && (
         <div className="itemCardDropdown">
           {acctTxs.length === 0 ? (
@@ -60,7 +63,7 @@ function AccountCard({ account, onEdit, onDelete, transactions, handle }) {
     </div>
   )
 }
-
+//income stream card
 function IncomeCard({ stream, accounts, onEdit, onDelete, handle }) {
   const account = accounts.find(a => a.id === stream.accountId)
   const orphaned = stream.accountId && !account
@@ -89,7 +92,7 @@ function IncomeCard({ stream, accounts, onEdit, onDelete, handle }) {
     </div>
   )
 }
-
+//default empty forms
 const EMPTY_A = { name: '', category: 'Cash', balance: '', note: '' }
 const EMPTY_I = { name: '', amount: '', frequency: 'monthly', accountId: '', startDate: '', customEvery: 1, customUnit: 'months' }
 
@@ -99,6 +102,7 @@ export default function Accounts() {
     addIncomeStream, updateIncomeStream, deleteIncomeStream,
     reorderAccounts, reorderIncomeStreams } = useStore()
 
+  //modal
   const [showAccountModal, setShowAccountModal] = useState(false)
   const [showIncomeModal, setShowIncomeModal] = useState(false)
   const [editingAccount, setEditingAccount] = useState(null)
@@ -108,12 +112,14 @@ export default function Accounts() {
   const [accountErrors, setAccountErrors] = useState({})
   const [incomeErrors, setIncomeErrors] = useState({})
 
+  //totals
   const totalBalance = accounts.reduce((s, a) => s + (a.balance || 0), 0)
   const hardAssets = accounts.filter(a => ['Assets','Investment'].includes(a.category)).reduce((s,a) => s+(a.balance||0),0)
   const cashAccounts = accounts.filter(a => ['Cash','Savings'].includes(a.category)).reduce((s,a) => s+(a.balance||0),0)
   const emergency = accounts.filter(a => a.category === 'Emergency').reduce((s,a) => s+(a.balance||0),0)
   const totalIncome = incomeStreams.reduce((s, i) => s + monthlyAmount(i), 0)
 
+   //open account modal
   const openAddAccount = () => { setEditingAccount(null); setAccountForm(EMPTY_A); setAccountErrors({}); setShowAccountModal(true) }
   const openEditAccount = (a) => { setEditingAccount(a); setAccountForm(a); setAccountErrors({}); setShowAccountModal(true) }
   const saveAccount = () => {
@@ -124,6 +130,7 @@ export default function Accounts() {
     setShowAccountModal(false)
   }
 
+  //open income modal
   const openAddIncome = () => { setEditingIncome(null); setIncomeForm(EMPTY_I); setIncomeErrors({}); setShowIncomeModal(true) }
   const openEditIncome = (s) => { setEditingIncome(s); setIncomeForm(s); setIncomeErrors({}); setShowIncomeModal(true) }
   const saveIncome = () => {
@@ -134,15 +141,18 @@ export default function Accounts() {
     setShowIncomeModal(false)
   }
 
+  //update form helpers
   const af = (k, v) => { setAccountForm(f => ({ ...f, [k]: v })); setAccountErrors(e => ({ ...e, [k]: null })) }
   const inf = (k, v) => { setIncomeForm(f => ({ ...f, [k]: v })); setIncomeErrors(e => ({ ...e, [k]: null })) }
 
   return (
     <div className="page">
+      {/*header*/}
       <div className="pageHeader">
         <div><h1 className="pageTitle">Accounts</h1><div className="pageSubtitle">Manage your accounts and income streams</div></div>
       </div>
 
+      {/*stats*/}
       <div className="statCards statCards3" style={{ marginBottom: 28 }}>
         <div className="statCard green"><div className="statLabel">Total Balance</div><div className="statValue">{fmt(totalBalance, true)}</div></div>
         <div className="statCard"><div className="statLabel">Est. Monthly Income</div><div className="statValue" style={{ color: 'var(--green-600)' }}>{fmt(totalIncome, true)}</div></div>
@@ -152,6 +162,8 @@ export default function Accounts() {
         <div className="statCard"><div className="statLabel">Non-Emergency</div><div className="statValue">{fmt(totalBalance - emergency, true)}</div></div>
       </div>
 
+      
+      {/*accounts section*/}
       <div className="sectionHeader">
         <div className="sectionTitle">Accounts</div>
         <button className="btn btnPrimary btnSm" onClick={openAddAccount}><Plus size={14} /> Add Account</button>
@@ -167,6 +179,7 @@ export default function Accounts() {
           )} />
       )}
 
+      {/* Income section*/}
       <div className="sectionHeader">
         <div className="sectionTitle">Income</div>
         <button className="btn btnPrimary btnSm" onClick={openAddIncome}><Plus size={14} /> Add Income Stream</button>
@@ -182,6 +195,7 @@ export default function Accounts() {
           )} />
       )}
 
+      {/*account modal*/}
       {showAccountModal && (
         <Modal title={editingAccount ? 'Edit Account' : 'Add Account'} onClose={() => setShowAccountModal(false)}
           footer={<><button className="btn btnSecondary" onClick={() => setShowAccountModal(false)}>Cancel</button>
@@ -207,6 +221,7 @@ export default function Accounts() {
         </Modal>
       )}
 
+      {/*income modal*/}
       {showIncomeModal && (
         <Modal title={editingIncome ? 'Edit Income Stream' : 'Add Income Stream'} onClose={() => setShowIncomeModal(false)}
           footer={<><button className="btn btnSecondary" onClick={() => setShowIncomeModal(false)}>Cancel</button>
