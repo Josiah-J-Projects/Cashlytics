@@ -16,14 +16,14 @@ Go to **[josiah-j-projects.github.io/Cashlytics](https://josiah-j-projects.githu
 
 | Feature | Details | Implemented |
 |--------|---------|-------------|
-| Dashboard | Overview of balances, activity, and key financial insights in one view. | - [x] |
-| Accounts | Manage account types. | - [x] |
-| Income Streams | Set up recurring income with customizable options. | - [x] |
-| Credit Accounts | Track credit balances, interest, grace periods, and minimum payments automatically. | - [x] |
-| Recurring Expenses | Schedule recurring expenses linked to accounts and budget categories. | - [x] |
-| Budgeting Page | Allocate budgets by category with visual breakdowns and spending comparisons. | - [x] |
-| Transaction Log | View and search all transactions with filtering and per-account history. | - [x] |
-| Calendar | See upcoming financial events and add transactions directly from a monthly view. | - [x] |
+| Dashboard | Overview of balances, activity, and key financial insights in one view. | ✓   |
+| Accounts | Manage account types. | ✓   |
+| Income Streams | Set up recurring income with customizable options. | ✓  |
+| Credit Accounts | Track credit balances, interest, grace periods, and minimum payments automatically. | ✓   |
+| Recurring Expenses | Schedule recurring expenses linked to accounts and budget categories. | ✓   |
+| Budgeting Page | Allocate budgets by category with visual breakdowns and spending comparisons. | ✓   |
+| Transaction Log | View and search all transactions with filtering and per-account history. | ✓   |
+| Calendar | See upcoming financial events and add transactions directly from a monthly view. |✓   |
 | Save and Load | Export and import data with the option of encrypting the data. | |
 | Catch Up Data | Automatically generate missed recurring transactions when loading older data. | |
 | Demo Mode | Load sample data for demonstration purposes. | |
