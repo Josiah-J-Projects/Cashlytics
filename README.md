@@ -1,16 +1,38 @@
-# React + Vite
+# Cashlytics
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Author
+**Josiah Jukes**
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Overview
 
-## React Compiler
+Cashlytics is a personal finance tracker that lets you manage accounts, track income and expense streams, set budgets, log transactions, and view upcoming events on a calendar.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Features
+
+| Feature | Details | Implemented |
+|--------|---------|-------------|
+| Dashboard | Overview of balances, activity, and key financial insights in one view. | - [x] |
+| Accounts | Manage account types. | - [x] |
+| Income Streams | Set up recurring income with customizable options. | - [x] |
+| Credit Accounts | Track credit balances, interest, grace periods, and minimum payments automatically. | - [x] |
+| Recurring Expenses | Schedule recurring expenses linked to accounts and budget categories. | - [x] |
+| Budgeting Page | Allocate budgets by category with visual breakdowns and spending comparisons. | - [x] |
+| Transaction Log | View and search all transactions with filtering and per-account history. | - [x] |
+| Calendar | See upcoming financial events and add transactions directly from a monthly view. | - [x] |
+| Save and Load | Export and import data with the option of encrypting the data. | |
+| Catch Up Data | Automatically generate missed recurring transactions when loading older data. | |
+| Demo Mode | Load sample data for demonstration purposes. | |
+| Backend Database | Persistent storage for securely saving and retrieving user data anywhere. | |
+
+
+## Tech Stack
+- **Languages:** HTML, CSS, JavaScript 
+- **Frontend framework:** React  
+- **Build tool:** Vite  
+- **State management:** Zustand  
+- **Charts:** Recharts  
+- **Icons:** Lucide  
+
