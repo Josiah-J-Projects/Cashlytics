@@ -22,7 +22,7 @@ export function Sidebar({ open, onClose }) {
       {open && <div className="sidebarOverlay" onClick={onClose} />}
       <nav className={`sidebar${open ? ' open' : ''}`}>
         <div className="sidebarLogo">
-          <img src="/Logo.png" alt="Cashlytics" />
+          <img src="Logo.png" alt="Cashlytics" />
           <span>Cashlytics</span>
         </div>
         <div className="sidebarAddTx">
@@ -59,7 +59,7 @@ export function Topbar({ onMenuClick }) {
         <Menu size={20} />
       </button>
       <div className="topbarLogo">
-        <img src="/Logo.png" alt="Cashlytics" />
+        <img src="Logo.png" alt="Cashlytics" />
         Cashlytics
       </div>
       <button className="btn btnPrimary btnSm" onClick={() => openTxModal()}>
