@@ -6,9 +6,11 @@
 
 ## Overview
 
-Cashlytics is a personal finance tracker that lets you manage accounts, track income and expense streams, set budgets, log transactions, and view upcoming events on a calendar.
+Cashlytics is a personal finance tracker that lets you manage accounts, track income and expenses, set budgets, log transactions, and view upcoming events on a calendar.
 
 
+## How To Use
+Go to **[josiah-j-projects.github.io/Cashlytics](https://josiah-j-projects.github.io/Cashlytics/)**
 
 ## Features
 
