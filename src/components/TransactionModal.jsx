@@ -78,7 +78,7 @@ export default function TransactionModal({ defaultDate, onClose }) {
           className={errors.name ? 'inputError' : ''}
           value={form.name}
           onChange={e => { f('name', e.target.value); setErrors(p => ({ ...p, name: null })) }}
-          placeholder={txType === 'income' ? 'e.g. Salary, Freelance payment' : 'e.g. Groceries, Netflix'}
+          placeholder={txType === 'income' ? 'e.g. Gifts, Tax Return' : 'e.g. Groceries, Movie Tickets'}
           autoFocus
         />
         {errors.name && <span className="errorText">{errors.name}</span>}

@@ -298,7 +298,7 @@ export default function Credit() {
           
           {/*account name input*/}
           <FormGroup label="Account Name">
-            <input className={creditErrors.name ? 'inputError' : ''} value={creditForm.name} onChange={e => cf('name', e.target.value)} placeholder="e.g. Visa, Line of Credit" />
+            <input className={creditErrors.name ? 'inputError' : ''} value={creditForm.name} onChange={e => cf('name', e.target.value)} placeholder="e.g. Credit Card, Line of Credit" />
             {creditErrors.name && <span className="errorText">{creditErrors.name}</span>}
           </FormGroup>
           <div className="formRow">
@@ -348,7 +348,7 @@ export default function Credit() {
             <button className="btn btnPrimary" onClick={saveExpense}>{editingExpense ? 'Save' : 'Add'}</button></>}>
           {/*expense name input*/}
           <FormGroup label="Expense Name">
-            <input className={expenseErrors.name ? 'inputError' : ''} value={expenseForm.name} onChange={e => ef('name', e.target.value)} placeholder="e.g. Netflix, Rent, Hydro" />
+            <input className={expenseErrors.name ? 'inputError' : ''} value={expenseForm.name} onChange={e => ef('name', e.target.value)} placeholder="e.g. Subscriptions, Rent, Utilities" />
             {expenseErrors.name && <span className="errorText">{expenseErrors.name}</span>}
           </FormGroup>
           <div className="formRow">

@@ -10,7 +10,7 @@ function validate(form, type) {
   const errs = {}
   //check name
   if (!form.name?.trim()) errs.name = 'Name is required'
-  if (type === 'account' && (form.balance === '' || isNaN(parseFloat(form.balance ?? '')))) errs.balance = 'Balance is required'
+  if (type === 'account' && form.balance !== '' && isNaN(parseFloat(form.balance))) { errs.balance = 'Balance must be a number'}
   if (type === 'income') {
     if (!form.amount || isNaN(parseFloat(form.amount))) errs.amount = 'Amount is required'
     if (!form.frequency) errs.frequency = 'Frequency is required'
@@ -79,7 +79,7 @@ function IncomeCard({ stream, accounts, onEdit, onDelete, handle }) {
           </div>
           <div className="itemCardMeta">
             {FREQ_LABELS[stream.frequency] || stream.frequency}
-            {account ? ` · → ${account.name}` : orphaned ? ' · No account!' : ''}
+            {account ? ` - ${account.name}` : orphaned ? ' · No account!' : ''}
             {stream.startDate ? ` · From ${stream.startDate}` : ''}
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function Accounts() {
   }
 
   //update form helpers
-  const af = (k, v) => { setAccountForm(f => ({ ...f, [k]: v })); setAccountErrors(e => ({ ...e, [k]: null })) }
+  const af = (k, v) => (setAccountForm(f => ({ ...f, [k]: k === 'balance' ? (v === '' ? 0 : parseFloat(v)) : v })), setAccountErrors(e => ({ ...e, [k]: null })));
   const inf = (k, v) => { setIncomeForm(f => ({ ...f, [k]: v })); setIncomeErrors(e => ({ ...e, [k]: null })) }
 
   return (
@@ -157,8 +157,8 @@ export default function Accounts() {
         <div className="statCard green"><div className="statLabel">Total Balance</div><div className="statValue">{fmt(totalBalance, true)}</div></div>
         <div className="statCard"><div className="statLabel">Est. Monthly Income</div><div className="statValue" style={{ color: 'var(--green-600)' }}>{fmt(totalIncome, true)}</div></div>
         <div className="statCard"><div className="statLabel">Emergency Funds</div><div className="statValue">{fmt(emergency, true)}</div></div>
+        <div className="statCard"><div className="statLabel">Cash Assets</div><div className="statValue">{fmt(cashAccounts, true)}</div></div>
         <div className="statCard"><div className="statLabel">Hard Assets</div><div className="statValue">{fmt(hardAssets, true)}</div></div>
-        <div className="statCard"><div className="statLabel">Cash & Savings</div><div className="statValue">{fmt(cashAccounts, true)}</div></div>
         <div className="statCard"><div className="statLabel">Non-Emergency</div><div className="statValue">{fmt(totalBalance - emergency, true)}</div></div>
       </div>
 
@@ -201,7 +201,7 @@ export default function Accounts() {
           footer={<><button className="btn btnSecondary" onClick={() => setShowAccountModal(false)}>Cancel</button>
             <button className="btn btnPrimary" onClick={saveAccount}>{editingAccount ? 'Save Changes' : 'Add Account'}</button></>}>
           <FormGroup label="Account Name">
-            <input className={accountErrors.name ? 'inputError' : ''} value={accountForm.name} onChange={e => af('name', e.target.value)} placeholder="e.g. TD Chequing" />
+            <input className={accountErrors.name ? 'inputError' : ''} value={accountForm.name} onChange={e => af('name', e.target.value)} placeholder="e.g. Chequing Account" />
             {accountErrors.name && <span className="errorText">{accountErrors.name}</span>}
           </FormGroup>
           <div className="formRow">

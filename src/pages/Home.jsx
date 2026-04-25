@@ -91,7 +91,7 @@ export default function Home() {
         <div className="statCard green">
           <div className="statLabel">Net Worth</div>
           <div className="statValue">{fmt(netWorth, true)}</div>
-          <div style={{ fontSize: 12, marginTop: 8, color: 'rgba(255,255,255,0.65)' }}>Assets − Debt</div>
+          <div style={{ fontSize: 12, marginTop: 8, color: 'rgba(255,255,255,0.65)' }}>Assets - Debt = Net</div>
         </div>
         <div className="statCard">
           <div className="statLabel">Total Assets</div>
@@ -109,7 +109,7 @@ export default function Home() {
             {fmt(monthlyIncome - monthlyExpenses, true)}
           </div>
           <div style={{ fontSize: 12, marginTop: 8, color: 'var(--gray-400)' }}>
-            {fmt(monthlyIncome, true)} in · {fmt(monthlyExpenses, true)} out
+            {fmt(monthlyIncome, true)} income - {fmt(monthlyExpenses, true)} expenses
           </div>
         </div>
       </div>
