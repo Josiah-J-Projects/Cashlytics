@@ -5,6 +5,7 @@ import {
   ArrowLeftRight, Calendar, Menu, TrendingUp, Plus
 } from 'lucide-react'
 import { useAppContext } from '../context/AppContext.jsx'
+import SaveLoad from './SaveLoad.jsx'
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -41,6 +42,7 @@ export function Sidebar({ open, onClose }) {
           ))}
         </div>
         <div className="sidebarFooter">
+          <SaveLoad />
           <div style={{ fontSize: 11, color: 'var(--gray-600)' }}>
             <TrendingUp size={12} style={{ display: 'inline', marginRight: 4 }} />
             Your Finances, Simplified
