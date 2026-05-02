@@ -3,6 +3,7 @@
 ## Author
 **Josiah Jukes**
 
+<img width="864" height="486" alt="Cashlytics Video" src="https://github.com/user-attachments/assets/c2fcc786-f74b-47bd-86a0-d5d8e71134a3" />
 
 ## Overview
 
