@@ -20,14 +20,16 @@ Go to **[josiah-j-projects.github.io/Cashlytics](https://josiah-j-projects.githu
 | Accounts | Manage account types. | ✓   |
 | Income Streams | Set up recurring income with customizable options. | ✓  |
 | Credit Accounts | Track credit balances, interest, grace periods, and minimum payments automatically. | ✓   |
-| Recurring Expenses | Schedule recurring expenses linked to accounts and budget categories. | ✓   |
-| Budgeting Page | Allocate budgets by category with visual breakdowns and spending comparisons. | ✓   |
-| Transaction Log | View and search all transactions with filtering and per-account history. | ✓   |
-| Calendar | See upcoming financial events and add transactions directly from a monthly view. |✓   |
-| Save and Load | Export and import data with the option of encrypting the data. | |
-| Catch Up Data | Automatically generate missed recurring transactions when loading older data. | |
+| Recurring Expenses | Schedule recurring expenses linked to accounts and budget categories. | ✓ |
+| Budgeting Page | Allocate budgets by category with visual breakdowns and spending comparisons. | ✓ |
+| Transaction Log | View and search all transactions with filtering and per-account history. | ✓ |
+| Calendar | See upcoming financial events and add transactions directly from a monthly view. |✓ |
+| Save and Load | Export and import data with the option of encrypting the data. | ✓ |
+| Catch Up Data | Automatically generate missed recurring transactions when loading older data. | ✓ |
 | Demo Mode | Load sample data for demonstration purposes. | |
 | Backend Database | Persistent storage for securely saving and retrieving user data anywhere. | |
+|Financial Reorganisation| Transfer money between accounts, Recurring Account transfers, account trannsfers can be assigned to budget categories such as investments or emergency funds||
+|Auto Calc|Option to automatically calculate/suggest certain values such as ideal emergency fund amount and ideal amount to allocate towards debt||
 
 
 ## Tech Stack
