@@ -94,6 +94,8 @@ export const useStore = create((set, get) => ({
       expenseStreams: [],
       budgetCategories: [],
       transactions: [],
+      accountTransfers: [],
+      transferLog: [],
 
       // Reordering (for drag-and-drop)
       reorderAccounts:        (items) => set({ accounts: items }),
@@ -101,6 +103,7 @@ export const useStore = create((set, get) => ({
       reorderCreditAccounts:  (items) => set({ creditAccounts: items }),
       reorderExpenseStreams:   (items) => set({ expenseStreams: items }),
       reorderBudgetCategories:(items) => set({ budgetCategories: items }),
+      reorderAccountTransfers:(items) => set({ accountTransfers: items }),
 
       // accounts
       addAccount: (data) => set(s => ({
@@ -232,6 +235,105 @@ export const useStore = create((set, get) => ({
           return newState
         })
       },
+      //Transfers
+            executeTransfer: (data) => {
+              // build transfer object
+              const transfer = {
+                ...data,
+                id: uid(),
+                amount: parseFloat(data.amount),
+                date: data.date || todayStr(),
+                createdAt: new Date().toISOString(),
+              }
+              // update state values
+              set(s => {
+                let accounts = [...s.accounts]
+                let creditAccounts = [...s.creditAccounts]
+                const amt = transfer.amount
+      
+                // deduct from source
+                if (transfer.fromType === 'regular') {
+                  accounts = accounts.map(a =>
+                    a.id === transfer.fromId ? { ...a, balance: (a.balance || 0) - amt } : a
+                  )
+                } else {
+                  // increase credit debt
+                  creditAccounts = creditAccounts.map(a =>
+                    a.id === transfer.fromId ? { ...a, balance: (a.balance || 0) + amt } : a
+                  )
+                }
+      
+                //add to destination
+                if (transfer.toType === 'regular') {
+                  accounts = accounts.map(a =>
+                    a.id === transfer.toId ? { ...a, balance: (a.balance || 0) + amt } : a
+                  )
+                } else {
+                  //reduce credit debt
+                  creditAccounts = creditAccounts.map(a => {
+                    if (a.id !== transfer.toId) return a
+                    let rem = amt
+                    const interest = Math.min(a.accruedInterest || 0, rem); rem -= interest
+                    const principal = Math.min(a.balance || 0, rem); rem -= principal
+                    return {
+                      ...a,
+                      accruedInterest: Math.max(0, (a.accruedInterest || 0) - interest),
+                      balance: Math.max(0, (a.balance || 0) - principal),
+                      creditBalance: (a.creditBalance || 0) + rem,
+                    }
+                  })
+                }
+                // return updated state
+                return { accounts, creditAccounts, transferLog: [...s.transferLog, transfer] }
+              })
+            },
+            // delete existing transfer
+            deleteTransfer: (id) => {
+              const transfer = get().transferLog.find(t => t.id === id)
+              if (!transfer) return
+              set(s => {
+                let accounts = [...s.accounts]
+                let creditAccounts = [...s.creditAccounts]
+                const amt = transfer.amount
+      
+                // reverse source deduction
+                if (transfer.fromType === 'regular') {
+                  accounts = accounts.map(a =>
+                    a.id === transfer.fromId ? { ...a, balance: (a.balance || 0) + amt } : a
+                  )
+                } else {
+                  // reduce credit balance
+                  creditAccounts = creditAccounts.map(a =>
+                    a.id === transfer.fromId ? { ...a, balance: Math.max(0, (a.balance || 0) - amt) } : a
+                  )
+                }
+      
+                // reverse destination addition
+                if (transfer.toType === 'regular') {
+                  accounts = accounts.map(a =>
+                    a.id === transfer.toId ? { ...a, balance: Math.max(0, (a.balance || 0) - amt) } : a
+                  )
+                } else {
+                  // restore credit account
+                  creditAccounts = creditAccounts.map(a =>
+                    a.id === transfer.toId ? { ...a, balance: (a.balance || 0) + amt, creditBalance: Math.max(0, (a.creditBalance || 0) - amt) } : a
+                  )
+                }
+      
+                return { accounts, creditAccounts, transferLog: s.transferLog.filter(t => t.id !== id) }
+              })
+            },
+      
+            // recurring account transfers
+            addAccountTransfer: (data) => set(s => ({
+              accountTransfers: [...s.accountTransfers, { ...data, id: uid(), amount: parseFloat(data.amount) }]
+            })),
+            updateAccountTransfer: (id, data) => set(s => ({
+              accountTransfers: s.accountTransfers.map(t => t.id === id ? { ...t, ...data, amount: parseFloat(data.amount ?? t.amount) } : t)
+            })),
+            deleteAccountTransfer: (id) => set(s => ({
+              accountTransfers: s.accountTransfers.filter(t => t.id !== id)
+            })),
       exportState: () => {
         const s = get()
         return JSON.stringify({
@@ -241,6 +343,8 @@ export const useStore = create((set, get) => ({
           expenseStreams: s.expenseStreams,
           budgetCategories: s.budgetCategories,
           transactions: s.transactions,
+          accountTransfers: s.accountTransfers,
+          transferLog: s.transferLog,
           savedAt: new Date().toISOString(),
           version: 2,
         }, null, 2)
@@ -253,6 +357,8 @@ export const useStore = create((set, get) => ({
           expenseStreams: parsed.expenseStreams || [],
           budgetCategories: parsed.budgetCategories || [],
           transactions: parsed.transactions || [],
+          accountTransfers: parsed.accountTransfers || [],
+          transferLog: parsed.transferLog || [],
         }
         if (options.catchUpTransactions && options.catchUpTransactions.length > 0) {
           const newTxs = options.catchUpTransactions.map(tx => ({ ...tx, id: uid() }))

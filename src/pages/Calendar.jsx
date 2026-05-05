@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 export default function CalendarPage() {
   //get data and actions from global store
-  const { incomeStreams, expenseStreams, transactions, accounts, creditAccounts } = useStore()
+  const { incomeStreams, expenseStreams, transactions, accounts, creditAccounts, accountTransfers } = useStore()
   const { timeOffset } = useDevStore()
   const now = new Date(Date.now() + timeOffset)
   //state for current month and modal date
@@ -55,9 +55,16 @@ export default function CalendarPage() {
         }
       } catch {}
     })
+    accountTransfers.forEach(t => {
+          getNextOccurrences(t, monthStart, 15).forEach(d => {
+            if (d >= monthStart && d <= monthEnd) {
+              add(d, { type: 'transfer', label: `${t.name} (${fmt(t.amount, true)})` })
+            }
+          })
+        })
 
     return events
-  }, [incomeStreams, expenseStreams, transactions, currentMonth])
+  }, [incomeStreams, expenseStreams, transactions, accountTransfers, currentMonth])
 
   //generate days for calendar grid
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd })
@@ -124,6 +131,7 @@ export default function CalendarPage() {
           <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 12, color: 'var(--gray-500)' }}>
             <span><span style={{ background: 'var(--green-100)', color: 'var(--green-800)', padding: '2px 8px', borderRadius: 4, marginRight: 4 }}>■</span>Income</span>
             <span><span style={{ background: 'var(--red-100)', color: 'var(--red-500)', padding: '2px 8px', borderRadius: 4, marginRight: 4 }}>■</span>Expense</span>
+            <span><span style={{ background: 'var(--blue-100)', color: 'var(--blue-500)', padding: '2px 8px', borderRadius: 4, marginRight: 4 }}>■</span>Transfer</span>
             <span style={{ color: 'var(--gray-400)', marginLeft: 8 }}>Legend</span>
           </div>
         </div>
@@ -142,11 +150,11 @@ export default function CalendarPage() {
               {/*event info*/}
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--gray-900)' }}>{evt.label.split(' (')[0]}</div>
-                <div style={{ fontSize: 12, color: evt.type === 'income' ? 'var(--green-600)' : 'var(--red-500)', marginTop: 2, fontWeight: 600 }}>
+                <div style={{ fontSize: 12, color: evt.type === 'income' ? 'var(--green-600)' : evt.type === 'transfer' ? 'var(--blue-500)' : 'var(--red-500)', marginTop: 2, fontWeight: 600 }}>
                   {evt.label.match(/\(([^)]+)\)/)?.[1] || ''}
                 </div>
               </div>
-              <span className={`badge ${evt.type === 'income' ? 'badgeGreen' : 'badgeRed'}`}>{evt.type}</span>
+              <span className={`badge ${evt.type === 'income' ? 'badgeGreen' : evt.type === 'transfer' ? 'badgeBlue' : 'badgeRed'}`}>{evt.type}</span>
             </div>
           ))}
         </div>

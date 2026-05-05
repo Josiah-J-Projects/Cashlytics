@@ -2,8 +2,9 @@ import React, { useState } from 'react'
 import { useStore, fmt, FREQ_LABELS, ACCOUNT_CATEGORIES } from '../store/index.js'
 import { Modal, FormGroup } from '../components/Modal.jsx'
 import { DraggableList } from '../components/DraggableList.jsx'
-import { Wallet, Plus, ChevronDown, ChevronUp, Edit2, Trash2, TrendingUp, AlertCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { Wallet, Plus, ChevronDown, ChevronUp, Edit2, Trash2, TrendingUp, AlertCircle, ArrowUpRight, ArrowDownRight, ArrowRightLeft } from 'lucide-react'
 import { monthlyAmount } from '../store/index.js'
+import TransferModal from '../components/TransferModal.jsx'
 
 //check form fields
 function validate(form, type) {
@@ -96,11 +97,115 @@ function IncomeCard({ stream, accounts, onEdit, onDelete, handle }) {
 const EMPTY_A = { name: '', category: 'Cash', balance: '', note: '' }
 const EMPTY_I = { name: '', amount: '', frequency: 'monthly', accountId: '', startDate: '', customEvery: 1, customUnit: 'months' }
 
+function RecurringTransferEditModal({ existing, accounts, creditAccounts, budgetCategories, onSave, onClose }) {
+  const allAccounts = [
+    ...accounts.map(a => ({ id: a.id, name: a.name, type: 'regular' })),
+    ...creditAccounts.map(a => ({ id: a.id, name: a.name, type: 'credit' })),
+  ]
+  //combine regular and credit accounts into a single list
+  const [form, setForm] = useState(existing || {
+    name: '', amount: '', fromId: '', fromType: 'regular',
+    toId: '', toType: 'regular', frequency: 'monthly',
+    startDate: '', budgetCategory: '', customEvery: 1, customUnit: 'months',
+  })
+  //If editing then preload with existing data
+  //If creating new then use default values
+  const [errors, setErrors] = useState({})
+  const ff = (k, v) => { setForm(f => ({ ...f, [k]: v })); setErrors(e => ({ ...e, [k]: null })) }
+  const setAcct = (side, id) => {
+    const acct = allAccounts.find(a => a.id === id)
+    ff(side === 'from' ? 'fromId' : 'toId', id)
+    ff(side === 'from' ? 'fromType' : 'toType', acct?.type || 'regular')
+  }
+  //checks if all values are valid when you submit 
+  const handleSave = () => {
+    const errs = {}
+    if (!form.name?.trim()) errs.name = 'Name is required'
+    if (!form.amount || parseFloat(form.amount) <= 0) errs.amount = 'Amount is required'
+    if (!form.fromId) errs.fromId = 'Source is required'
+    if (!form.toId)   errs.toId   = 'Destination is required'
+    if (form.fromId && form.fromId === form.toId) errs.toId = 'Must differ from source'
+    if (Object.keys(errs).length) { setErrors(errs); return }
+    onSave({ ...form, amount: parseFloat(form.amount) })
+  }
+  return (
+    <Modal title={existing ? 'Edit Automatic Transfer' : 'Add Automatic Transfer'} onClose={onClose}
+      footer={<><button className="btn btnSecondary" onClick={onClose}>Cancel</button>
+        <button className="btn btnPrimary" onClick={handleSave}>{existing ? 'Save' : 'Add'}</button></>}>
+      {/* name field */}
+      <FormGroup label="Name">
+        <input className={errors.name ? 'inputError' : ''} value={form.name}
+          onChange={e => ff('name', e.target.value)} placeholder="e.g. Monthly savings" autoFocus />
+        {errors.name && <span className="errorText">{errors.name}</span>}
+      </FormGroup>
+      <div className="formRow">
+        {/* from field */}
+        <FormGroup label="From Account">
+          <select className={errors.fromId ? 'inputError' : ''} value={form.fromId} onChange={e => setAcct('from', e.target.value)}>
+            <option value="">- Select -</option>
+            {accounts.length > 0 && <optgroup label="Regular">{accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</optgroup>}
+            {creditAccounts.length > 0 && <optgroup label="Credit">{creditAccounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</optgroup>}
+          </select>
+          {errors.fromId && <span className="errorText">{errors.fromId}</span>}
+        </FormGroup>
+        {/* to field */}
+        <FormGroup label="To Account">
+          <select className={errors.toId ? 'inputError' : ''} value={form.toId} onChange={e => setAcct('to', e.target.value)}>
+            <option value="">- Select -</option>
+            {accounts.length > 0 && <optgroup label="Regular">{accounts.map(a => <option key={a.id} value={a.id} disabled={a.id === form.fromId}>{a.name}</option>)}</optgroup>}
+            {creditAccounts.length > 0 && <optgroup label="Credit">{creditAccounts.map(a => <option key={a.id} value={a.id} disabled={a.id === form.fromId}>{a.name}</option>)}</optgroup>}
+          </select>
+          {errors.toId && <span className="errorText">{errors.toId}</span>}
+        </FormGroup>
+      </div>
+      <div className="formRow">
+        <FormGroup label="Amount ($)">
+          <input className={errors.amount ? 'inputError' : ''} type="number" min="0" step="0.01"
+            value={form.amount} onChange={e => ff('amount', e.target.value)} placeholder="0.00" />
+          {errors.amount && <span className="errorText">{errors.amount}</span>}
+        </FormGroup>
+        {/* frequency field */}
+        <FormGroup label="Frequency">
+          <select value={form.frequency} onChange={e => ff('frequency', e.target.value)}>
+            {Object.entries(FREQ_LABELS).filter(([k]) => k !== 'once').map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            <option value="custom">Custom</option>
+          </select>
+        </FormGroup>
+      </div>
+      {form.frequency === 'custom' && (
+        <div className="formRow">
+          <FormGroup label="Every"><input type="number" min={1} value={form.customEvery} onChange={e => ff('customEvery', e.target.value)} /></FormGroup>
+          <FormGroup label="Unit">
+            <select value={form.customUnit} onChange={e => ff('customUnit', e.target.value)}>
+              <option value="days">Days</option><option value="weeks">Weeks</option>
+              <option value="months">Months</option><option value="years">Years</option>
+            </select>
+          </FormGroup>
+        </div>
+      )}
+      {/* optional fields */}
+      <div className="formRow">
+        <FormGroup label="Start Date (optional)">
+          <input type="date" value={form.startDate} onChange={e => ff('startDate', e.target.value)} />
+        </FormGroup>
+        <FormGroup label="Budget Category (optional)">
+          <select value={form.budgetCategory} onChange={e => ff('budgetCategory', e.target.value)}>
+            <option value="">- None -</option>
+            {budgetCategories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+          </select>
+        </FormGroup>
+      </div>
+    </Modal>
+  )
+}
+
 export default function Accounts() {
-  const { accounts, incomeStreams, transactions,
+  const { accounts, incomeStreams, transactions, creditAccounts, budgetCategories,
     addAccount, updateAccount, deleteAccount,
     addIncomeStream, updateIncomeStream, deleteIncomeStream,
-    reorderAccounts, reorderIncomeStreams } = useStore()
+    reorderAccounts, reorderIncomeStreams, accountTransfers, 
+    addAccountTransfer, updateAccountTransfer,
+    deleteAccountTransfer, reorderAccountTransfers } = useStore()
 
   //modal
   const [showAccountModal, setShowAccountModal] = useState(false)
@@ -111,6 +216,9 @@ export default function Accounts() {
   const [incomeForm, setIncomeForm] = useState(EMPTY_I)
   const [accountErrors, setAccountErrors] = useState({})
   const [incomeErrors, setIncomeErrors] = useState({})
+  const [showTransferModal, setShowTransferModal] = useState(false)
+  const [showRecurringTransferModal, setShowRecurringTransferModal] = useState(false)
+  const [editingRecurringTransfer, setEditingRecurringTransfer] = useState(null)
 
   //totals
   const totalBalance = accounts.reduce((s, a) => s + (a.balance || 0), 0)
@@ -150,6 +258,9 @@ export default function Accounts() {
       {/*header*/}
       <div className="pageHeader">
         <div><h1 className="pageTitle">Accounts</h1><div className="pageSubtitle">Manage your accounts and income streams</div></div>
+        <button className="btn btnPrimary btnSm" onClick={() => setShowTransferModal(true)}>
+                  <ArrowRightLeft size={14} /> Transfer Money
+                </button>
       </div>
 
       {/*stats*/}
@@ -195,6 +306,53 @@ export default function Accounts() {
           )} />
       )}
 
+      {/* automatic transfer section*/}
+      <div className="sectionHeader">
+        <div className="sectionTitle">Automatic Transfers</div>
+        <button className="btn btnPrimary btnSm" onClick={() => { setEditingRecurringTransfer(null); setShowRecurringTransferModal(true) }}>
+          <Plus size={14} /> Add Automatic Transfer
+        </button>
+      </div>
+      {accountTransfers.length === 0 ? (
+        <div className="emptyState">
+          <ArrowRightLeft size={40} />
+          <h3>No automatic transfers</h3>
+          <p>Schedule automatic transfers between accounts, e.g. emergency fund contributions</p>
+        </div>
+      ) : (
+        <DraggableList items={accountTransfers} onReorder={reorderAccountTransfers} keyExtractor={t => t.id}
+          renderItem={(t, _, handle) => {
+            const fromAcct = [...accounts, ...creditAccounts].find(a => a.id === t.fromId)
+            const toAcct   = [...accounts, ...creditAccounts].find(a => a.id === t.toId)
+            return (
+              <div className="itemCard">
+                <div className="itemCardHeader">
+                  {handle}
+                  <div className="itemCardIcon" style={{ background: 'var(--blue-100)', color: 'var(--blue-500)' }}>
+                    <ArrowRightLeft size={18} />
+                  </div>
+                  <div className="itemCardInfo">
+                    <div className="itemCardName">{t.name}</div>
+                    <div className="itemCardMeta">
+                      {FREQ_LABELS[t.frequency] || t.frequency}
+                      {fromAcct ? ` - from ${fromAcct.name}` : ''}
+                      {toAcct   ? ` - to ${toAcct.name}` : ''}
+                      {t.budgetCategory ? ` - ${t.budgetCategory}` : ''}
+                    </div>
+                  </div>
+                  <div className="itemCardValue">
+                    <div className="itemCardAmount" style={{ color: 'var(--blue-500)' }}>{fmt(t.amount)}</div>
+                  </div>
+                  <div className="itemCardActions">
+                    <button className="btn btnGhost btnIcon" onClick={() => { setEditingRecurringTransfer(t); setShowRecurringTransferModal(true) }}><Edit2 size={15} /></button>
+                    <button className="btn btnGhost btnIcon" style={{ color: 'var(--red-500)' }} onClick={() => deleteAccountTransfer(t.id)}><Trash2 size={15} /></button>
+                  </div>
+                </div>
+              </div>
+            )
+          }} />
+      )}
+
       {/*account modal*/}
       {showAccountModal && (
         <Modal title={editingAccount ? 'Edit Account' : 'Add Account'} onClose={() => setShowAccountModal(false)}
@@ -220,7 +378,26 @@ export default function Accounts() {
           </FormGroup>
         </Modal>
       )}
+      {/* single transfer modal */}
+      {showTransferModal && (
+        <TransferModal mode="once" onClose={() => setShowTransferModal(false)} />
+      )}
 
+      {/* Recurring transfer modal */}
+      {showRecurringTransferModal && (
+        <RecurringTransferEditModal
+          existing={editingRecurringTransfer}
+          accounts={accounts}
+          creditAccounts={creditAccounts}
+          budgetCategories={budgetCategories}
+          onSave={(data) => {
+            if (editingRecurringTransfer) updateAccountTransfer(editingRecurringTransfer.id, data)
+            else addAccountTransfer(data)
+            setShowRecurringTransferModal(false)
+          }}
+          onClose={() => setShowRecurringTransferModal(false)}
+        />
+      )}
       {/*income modal*/}
       {showIncomeModal && (
         <Modal title={editingIncome ? 'Edit Income Stream' : 'Add Income Stream'} onClose={() => setShowIncomeModal(false)}

@@ -674,6 +674,7 @@ textarea { resize: vertical; min-height: 80px; }
 .calEvent.income { background: var(--green-100); color: var(--green-800); }
 .calEvent.expense { background: var(--red-100); color: var(--red-500); }
 .calEvent.payment { background: var(--amber-100); color: var(--amber-500); }
+.calEvent.transfer { background: var(--blue-100); color: var(--blue-500); }
 
 /* empty state */
 .emptyState {
