@@ -270,16 +270,35 @@ export default function Budget() {
             </FormGroup>
           </div>
           <FormGroup label="Color">
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
-              {CATEGORY_COLORS.map(c => (
-                <div key={c} onClick={() => ff('color', c)} style={{
-                  width: 28, height: 28, borderRadius: '50%', background: c, cursor: 'pointer',
-                  border: form.color === c ? '3px solid var(--gray-900)' : '2px solid transparent',
-                  transform: form.color === c ? 'scale(1.15)' : 'scale(1)', transition: 'transform 0.1s'
-                }} />
-              ))}
-            </div>
-          </FormGroup>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4, alignItems: 'center' }}>
+                        {CATEGORY_COLORS.map(c => (
+                          <div key={c} onClick={() => ff('color', c)} style={{
+                            width: 28, height: 28, borderRadius: '50%', background: c, cursor: 'pointer',
+                            border: form.color === c ? '3px solid var(--gray-900)' : '2px solid transparent',
+                            transform: form.color === c ? 'scale(1.15)' : 'scale(1)', transition: 'transform 0.1s'
+                          }} />
+                        ))}
+                        <div style={{ position: 'relative', width: 28, height: 28, flexShrink: 0 }} title="Custom colour">
+                          <div style={{
+                            width: 28, height: 28, borderRadius: '50%', cursor: 'pointer',
+                            background: CATEGORY_COLORS.includes(form.color) ? 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)' : form.color,
+                            border: !CATEGORY_COLORS.includes(form.color) ? '3px solid var(--gray-900)' : '2px solid var(--gray-300)',
+                            transform: !CATEGORY_COLORS.includes(form.color) ? 'scale(1.15)' : 'scale(1)',
+                            transition: 'transform 0.1s',
+                          }} />
+                          <input
+                            type="color"
+                            value={form.color}
+                            onChange={e => ff('color', e.target.value)}
+                            style={{
+                              position: 'absolute', inset: 0, opacity: 0,
+                              width: '100%', height: '100%', cursor: 'pointer', border: 'none', padding: 0,
+                            }}
+                            title="Pick a custom colour"
+                          />
+                        </div>
+                      </div>
+                    </FormGroup>
           {monthlyIncome > 0 && form.allocated && form.allocationType === 'percentage' && (
             <div style={{ padding: '8px 12px', background: 'var(--green-50)', borderRadius: 8, fontSize: 13, color: 'var(--green-700)' }}>
               = {fmt(monthlyIncome * parseFloat(form.allocated) / 100)} per month

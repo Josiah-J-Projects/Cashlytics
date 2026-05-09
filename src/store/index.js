@@ -409,7 +409,7 @@ export const FREQ_LABELS = {
 
 export const ACCOUNT_CATEGORIES = ['Cash', 'Savings', 'Investment', 'Emergency', 'Assets']
 export const CATEGORY_COLORS = [
-  '#16a34a','#22c55e','#3b82f6','#8b5cf6','#f59e0b','#ef4444','#ec4899','#06b6d4','#f97316','#84cc16'
+  '#0A4821','#16a34a','#5DE991','#3399cc','#1B2CC1','#461177','#ec4899','#F01919','#BA0C0C','#730707','#F3B61F'
 ]
 
 export function monthlyAmount(stream) {
