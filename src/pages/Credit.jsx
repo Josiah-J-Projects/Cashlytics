@@ -5,6 +5,17 @@ import { DraggableList } from '../components/DraggableList.jsx'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { CreditCard, Plus, ChevronDown, ChevronUp, Edit2, Trash2, AlertCircle, ArrowDownRight, ArrowUpRight, TrendingDown } from 'lucide-react'
 
+function PieTooltip({ active, payload, total }) {
+  if (!active || !payload?.length) return null
+  const val = payload[0].value
+  const pct = total > 0 ? ((val / total) * 100).toFixed(1) : '0'
+  return (
+    <div style={{ background: 'var(--gray-900)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--white)', boxShadow: 'var(--shadowMd)' }}>
+      <div style={{ fontWeight: 600, marginBottom: 4 }}>{payload[0].name}</div>
+      <div>{fmt(val)} <span style={{ opacity: 0.7 }}>({pct}%)</span></div>
+    </div>
+  )
+}
 //check form fields
 function validate(form, type) {
   const errs = {}
@@ -62,6 +73,7 @@ function CreditCard2({ account, onEdit, onDelete, transactions, handle }) {
         <div className="itemCardValue" style={{ minWidth: 110, textAlign: 'right', marginLeft: 12 }}>
           <div style={{ fontSize: 11, color: 'var(--gray-400)', marginBottom: 2 }}>Limit</div>
           <div className="itemCardAmount">{fmt(account.limit)}</div>
+          <div style={{ fontSize: 11,color: 'var(--gray-400)', marginTop: 2 }}>{usedPct.toFixed(1)}% used</div>
           {/* Show credit amount when positive, otherwise show accrued interest */}
           {hasCreditBalance && (
             <div style={{ fontSize: 11, color: 'var(--green-600)', marginTop: 2 }}>+{fmt(account.creditBalance)} credit</div>
@@ -255,7 +267,7 @@ export default function Credit() {
               <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={70} dataKey="value" paddingAngle={3}>
                 {pieData.map((e, i) => <Cell key={i} fill={e.color} />)}
               </Pie>
-              <Tooltip formatter={v => fmt(v)} />
+              <Tooltip content={<PieTooltip total={totalLimit} />} />
             </PieChart>
           </ResponsiveContainer>
         </div>

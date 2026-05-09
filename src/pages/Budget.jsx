@@ -13,13 +13,40 @@ function validate(form) {
   if (!form.allocated || isNaN(parseFloat(form.allocated))) errs.allocated = 'Amount is required'
   return errs
 }
-//custom tooltip for charts
+//custom tooltips
 function ChartTooltip({ active, payload }) {
   if (!active || !payload?.length) return null
+  const d = payload[0]?.payload
+  if (!d) return null
+  const spent = d.spent || 0
+  const allocated = d.allocated || 0
+  const pct = allocated > 0 ? ((spent / allocated) * 100).toFixed(1) : '0'
   return (
     <div className="customTooltip">
-      <div style={{ fontWeight: 600, marginBottom: 4 }}>{payload[0]?.payload?.name}</div>
-      {payload.map(p => <div key={p.name} style={{ color: p.fill || '#fff' }}>{p.name}: {fmt(p.value)}</div>)}
+      <div style={{ fontWeight: 600, marginBottom: 6 }}>{d.fullName}</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+        <span>Allocated</span><span>{fmt(allocated)}</span>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+        <span>Spent</span><span><span style={{ opacity: 0.7 }}>({pct}%) </span>{fmt(spent)}</span>
+      </div>
+      {d.overspend > 0 && (
+        <div style={{ color: '#ef4444', marginTop: 4 }}>Over by {fmt(d.overspend)}</div>
+      )}
+      {d.underspend > 0 && (
+        <div style={{ color: '#16a34a', marginTop: 4 }}>{fmt(d.underspend)} remaining</div>
+      )}
+    </div>
+  )
+}
+function PieTooltip({ active, payload, total }) {
+  if (!active || !payload?.length) return null
+  const val = payload[0].value
+  const pct = total > 0 ? ((val / total) * 100).toFixed(1) : '0'
+  return (
+    <div className="customTooltip">
+      <div style={{ fontWeight: 600, marginBottom: 4 }}>{payload[0].name}</div>
+      <div>{fmt(val)} <span style={{ opacity: 0.7 }}>({pct}%)</span></div>
     </div>
   )
 }
@@ -151,7 +178,7 @@ export default function Budget() {
                 <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} dataKey="value" paddingAngle={2}>
                   {pieData.map((e, i) => <Cell key={i} fill={e.color} />)}
                 </Pie>
-                <Tooltip formatter={v => fmt(v)} />
+                <Tooltip content={<PieTooltip total={pieData.reduce((s,p)=>s+p.value,0)} />} />
                 <Legend iconType="circle" iconSize={8} formatter={v => <span style={{ fontSize: 11 }}>{v}</span>} />
               </PieChart>
             </ResponsiveContainer>
