@@ -30,7 +30,7 @@ Cashlytics is a personal finance tracker that lets you manage accounts, track in
 | Save and Load | Export and import data with the option of encrypting the data. | ✓ |
 | Catch Up Data | Automatically generate missed recurring transactions when loading older data. | ✓ |
 |Financial Reorganisation| Transfer money between accounts, Recurring Account transfers, account trannsfers can be assigned to budget categories such as for investments or emergency funds|✓|
-| Demo Mode | Load sample data for demonstration purposes. | |
+| Demo Mode | Load sample data for demonstration purposes. |✓|
 | Backend Database | Persistent storage for securely saving and retrieving user data anywhere. | |
 |Auto Calc|Option to automatically calculate/suggest certain values such as ideal emergency fund amount and ideal amount to allocate towards debt||
 
