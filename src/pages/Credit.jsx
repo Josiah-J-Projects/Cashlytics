@@ -120,10 +120,11 @@ function CreditCard2({ account, onEdit, onDelete, transactions, handle }) {
   )
 }
 
-function ExpenseCard({ stream, accounts, creditAccounts, onEdit, onDelete, handle }) {
+function ExpenseCard({ stream, accounts, creditAccounts, budgetCategories, onEdit, onDelete, handle }) {
   const allAccounts = [...accounts.map(a=>({...a,type:'regular'})), ...creditAccounts.map(a=>({...a,type:'credit'}))]
   const account = allAccounts.find(a => a.id === stream.accountId)
   const orphaned = stream.accountId && !account
+  const catLabel = budgetCategories.find(c => c.id === stream.budgetCategory)?.name || ''
   return (
     <div className="itemCard">
       <div className="itemCardHeader">
@@ -137,7 +138,7 @@ function ExpenseCard({ stream, accounts, creditAccounts, onEdit, onDelete, handl
           <div className="itemCardMeta">
             {FREQ_LABELS[stream.frequency] || stream.frequency}
             {account ? ` · ${account.name}` : orphaned ? ' · Account deleted!' : ''}
-            {stream.budgetCategory ? ` · ${stream.budgetCategory}` : ''}
+            {catLabel ? ` - ${catLabel}` : ''}
           </div>
         </div>
         {/*expense amount display*/}
@@ -287,7 +288,7 @@ export default function Credit() {
       ) : (
         <DraggableList items={expenseStreams} onReorder={reorderExpenseStreams} keyExtractor={s => s.id}
           renderItem={(s, _, handle) => (
-            <ExpenseCard stream={s} accounts={accounts} creditAccounts={creditAccounts} onEdit={openEditExpense} onDelete={deleteExpenseStream} handle={handle} />
+            <ExpenseCard stream={s} accounts={accounts} creditAccounts={creditAccounts} budgetCategories={budgetCategories} onEdit={openEditExpense} onDelete={deleteExpenseStream} handle={handle} />
           )} />
       )}
       {/*credit account modal*/}  
@@ -391,7 +392,7 @@ export default function Credit() {
             <FormGroup label="Budget Category (optional)">
               <select value={expenseForm.budgetCategory} onChange={e => ef('budgetCategory', e.target.value)}>
                 <option value=""> -  None  - </option>
-                {budgetCategories.map(c=><option key={c.id} value={c.name}>{c.name}</option>)}
+                {budgetCategories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </FormGroup>
           </div>

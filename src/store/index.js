@@ -250,6 +250,39 @@ export const useStore = create((set, get) => ({
                 let accounts = [...s.accounts]
                 let creditAccounts = [...s.creditAccounts]
                 const amt = transfer.amount
+        // Two transaction records: 'from' and 'to'
+        
+        const txFromId = uid()
+        const txToId   = uid()
+
+        const txFrom = {
+          id: txFromId,
+          pairedTxId: txToId,
+          transferId: transfer.id,
+          name: transfer.name,
+          amount: -amt,//negative
+          accountId: transfer.fromId,
+          accountType: transfer.fromType,
+          budgetCategory: transfer.budgetCategory || '',
+          date: transfer.date,
+          note: 'Transfer out',
+          createdAt: transfer.createdAt,
+          isTransfer: true,
+        }
+        const txTo = {
+          id: txToId,
+          pairedTxId: txFromId,
+          transferId: transfer.id,
+          name: transfer.name,
+          amount: amt,//positive
+          accountId: transfer.toId,
+          accountType: transfer.toType,
+          budgetCategory: '',// no budget category (spend side only)
+          date: transfer.date,
+          note: 'Transfer in',
+          createdAt: transfer.createdAt,
+          isTransfer: true,
+        }
       
                 // deduct from source
                 if (transfer.fromType === 'regular') {
@@ -284,7 +317,7 @@ export const useStore = create((set, get) => ({
                   })
                 }
                 // return updated state
-                return { accounts, creditAccounts, transferLog: [...s.transferLog, transfer] }
+                return { accounts, creditAccounts, transferLog: [...s.transferLog, transfer],transactions: [...s.transactions, txFrom, txTo], }
               })
             },
             // delete existing transfer
@@ -320,7 +353,10 @@ export const useStore = create((set, get) => ({
                   )
                 }
       
-                return { accounts, creditAccounts, transferLog: s.transferLog.filter(t => t.id !== id) }
+          //remove both paired transactions
+          const transactions = s.transactions.filter(t => t.transferId !== id)
+
+          return { accounts, creditAccounts, transferLog: s.transferLog.filter(t => t.id !== id), transactions }
               })
             },
       

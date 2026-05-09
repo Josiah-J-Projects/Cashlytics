@@ -126,7 +126,7 @@ export default function TransactionModal({ defaultDate, onClose }) {
         <FormGroup label="Budget Category (optional)">
           <select value={form.budgetCategory} onChange={e => f('budgetCategory', e.target.value)}>
             <option value=""> - None - </option>
-            {budgetCategories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+            {budgetCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </FormGroup>
       </div>

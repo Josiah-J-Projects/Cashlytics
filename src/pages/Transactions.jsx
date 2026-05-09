@@ -1,18 +1,20 @@
 import React, { useState, useMemo } from 'react'
 import { useStore, fmt, todayStr } from '../store/index.js'
-import { Plus, Trash2, ArrowUpRight, ArrowDownRight, Search } from 'lucide-react'
+import { Plus, Trash2, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Search } from 'lucide-react'
 import TransactionModal from '../components/TransactionModal.jsx'
 import { format } from 'date-fns'
 
 export default function Transactions() {
   //get data and actions from global store
-  const { accounts, creditAccounts, budgetCategories, transactions, deleteTransaction } = useStore()
+  const { accounts, creditAccounts, budgetCategories, transactions, deleteTransaction, deleteTransfer  } = useStore()
   //UI state
   const [showModal, setShowModal] = useState(false)
   const [search, setSearch] = useState('')
   const [filterAccount, setFilterAccount] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
   const [filterType, setFilterType] = useState('')
+//find category name from stored id
+  const catName = (id) => budgetCategories.find(c => c.id === id)?.name || ''
 
   //combine regular and credit accounts into one list
   const allAccounts = [
@@ -78,7 +80,7 @@ export default function Transactions() {
         {/* category filter */}
         <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
           <option value="">All Categories</option>
-          {budgetCategories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+          {budgetCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
         {/* type filter */}
         <select value={filterType} onChange={e => setFilterType(e.target.value)}>
@@ -103,24 +105,48 @@ export default function Transactions() {
           <div className="card" style={{ padding: '4px 20px' }}>
             {txs.map(tx => {
               const acct = allAccounts.find(a => a.id === tx.accountId)
+              const isTransfer = !!tx.isTransfer
+              const iconBg = isTransfer
+                ? 'var(--blue-100)'
+                : tx.amount >= 0 ? 'var(--green-50)' : 'var(--red-100)'
+              const iconColor = isTransfer
+                ? 'var(--blue-500)'
+                : tx.amount >= 0 ? 'var(--green-600)' : 'var(--red-500)'
+              const amtColor = isTransfer
+                ? 'var(--blue-500)'
+                : tx.amount >= 0 ? 'var(--green-600)' : 'var(--red-500)'
+              const catLabel = catName(tx.budgetCategory)
               return (
                 <div key={tx.id} className="txRow">
-                  {/*income vs expense icon*/}
-                  <div className="txIcon" style={{ background: tx.amount >= 0 ? 'var(--green-50)' : 'var(--red-100)', borderRadius: 10, width: 40, height: 40 }}>
-                    {tx.amount >= 0 ? <ArrowUpRight size={18} color="var(--green-600)" /> : <ArrowDownRight size={18} color="var(--red-500)" />}
+                  <div className="txIcon" style={{ background: iconBg, borderRadius: 10, width: 40, height: 40 }}>
+                    {isTransfer
+                      ? <ArrowRightLeft size={18} color={iconColor} />
+                      : tx.amount >= 0
+                        ? <ArrowUpRight size={18} color={iconColor} />
+                        : <ArrowDownRight size={18} color={iconColor} />
+                    }
                   </div>
                   {/*transaction info*/}
                   <div className="txInfo">
                     <div className="txName">{tx.name}</div>
-                    <div className="txMeta">{acct?.name || ' - '}{tx.budgetCategory ? ` · ${tx.budgetCategory}` : ''}{tx.note ? ` · ${tx.note}` : ''}</div>
+                    <div className="txMeta">
+                      {acct?.name || '-'}
+                      {catLabel ? ` - ${catLabel}` : ''}
+                      {tx.note ? ` - ${tx.note}` : ''}
+                    </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div className="txAmount" style={{ color: tx.amount >= 0 ? 'var(--green-600)' : 'var(--red-500)' }}>
+                    <div className="txAmount" style={{ color: amtColor }}>
                       {tx.amount >= 0 ? '+' : ''}{fmt(tx.amount)}
                     </div>
                     {/* delete transaction */}
                     <button className="btn btnGhost btnIcon" style={{ color: 'var(--gray-400)' }}
-                      onClick={() => { if (confirm(`Delete "${tx.name}"?`)) deleteTransaction(tx.id) }}>
+                      onClick={() => {
+                        if (!confirm(`Delete "${tx.name}"?`)) return
+                        //transfers: deleting one removes both paired records
+                        if (isTransfer && tx.transferId) deleteTransfer(tx.transferId)
+                        else deleteTransaction(tx.id)
+                      }}>
                       <Trash2 size={14} />
                     </button>
                   </div>

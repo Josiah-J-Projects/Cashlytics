@@ -19,7 +19,7 @@ function validate(form, type) {
   return errs
 }
 //account card
-function AccountCard({ account, onEdit, onDelete, transactions, handle }) {
+function AccountCard({ account, onEdit, onDelete, transactions, budgetCategories, handle }) {
   const [expanded, setExpanded] = useState(false)
   const acctTxs = transactions.filter(t => t.accountId === account.id).sort((a,b) => new Date(b.date)-new Date(a.date))
   return (
@@ -52,7 +52,7 @@ function AccountCard({ account, onEdit, onDelete, transactions, handle }) {
               </div>
               <div className="txInfo">
                 <div className="txName" style={{ fontSize: 13 }}>{tx.name}</div>
-                <div className="txMeta">{tx.date}{tx.budgetCategory ? ` · ${tx.budgetCategory}` : ''}</div>
+                <div className="txMeta">{tx.date}{tx.budgetCategory ? ` - ${budgetCategories.find(c => c.id === tx.budgetCategory)?.name || ''}` : ''}</div>
               </div>
               <div className="txAmount" style={{ fontSize: 13, color: tx.amount >= 0 ? 'var(--green-600)' : 'var(--red-500)' }}>
                 {tx.amount >= 0 ? '+' : ''}{fmt(tx.amount)}
@@ -191,7 +191,7 @@ function RecurringTransferEditModal({ existing, accounts, creditAccounts, budget
         <FormGroup label="Budget Category (optional)">
           <select value={form.budgetCategory} onChange={e => ff('budgetCategory', e.target.value)}>
             <option value="">- None -</option>
-            {budgetCategories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+            {budgetCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </FormGroup>
       </div>
@@ -250,7 +250,7 @@ export default function Accounts() {
   }
 
   //update form helpers
-  const af = (k, v) => (setAccountForm(f => ({ ...f, [k]: k === 'balance' ? (v === '' ? 0 : parseFloat(v)) : v })), setAccountErrors(e => ({ ...e, [k]: null })));
+  const af = (k, v) => { setAccountForm(f => ({ ...f, [k]: v })); setAccountErrors(e => ({ ...e, [k]: null })) }
   const inf = (k, v) => { setIncomeForm(f => ({ ...f, [k]: v })); setIncomeErrors(e => ({ ...e, [k]: null })) }
 
   return (
@@ -286,7 +286,7 @@ export default function Accounts() {
       ) : (
         <DraggableList items={accounts} onReorder={reorderAccounts} keyExtractor={a => a.id}
           renderItem={(a, _, handle) => (
-            <AccountCard account={a} onEdit={openEditAccount} onDelete={deleteAccount} transactions={transactions} handle={handle} />
+            <AccountCard account={a} onEdit={openEditAccount} onDelete={deleteAccount} transactions={transactions} budgetCategories={budgetCategories} handle={handle} />
           )} />
       )}
 
@@ -337,7 +337,7 @@ export default function Accounts() {
                       {FREQ_LABELS[t.frequency] || t.frequency}
                       {fromAcct ? ` - from ${fromAcct.name}` : ''}
                       {toAcct   ? ` - to ${toAcct.name}` : ''}
-                      {t.budgetCategory ? ` - ${t.budgetCategory}` : ''}
+                      {t.budgetCategory ? ` - ${budgetCategories.find(c => c.id === t.budgetCategory)?.name || ''}` : ''}
                     </div>
                   </div>
                   <div className="itemCardValue">

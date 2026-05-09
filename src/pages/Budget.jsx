@@ -55,7 +55,7 @@ export default function Budget() {
 
   //calculate total spent in a category
   const getCatSpent = (cat) =>
-    Math.abs(thisMonthTxs.filter(t => t.budgetCategory === cat.name && t.amount < 0).reduce((s, t) => s + t.amount, 0))
+    Math.abs(thisMonthTxs.filter(t => t.budgetCategory === cat.id && t.amount < 0).reduce((s, t) => s + t.amount, 0))
 
   //totals
   const totalAllocated = budgetCategories.reduce((s, c) => s + getCatAllocated(c), 0)
@@ -192,7 +192,7 @@ export default function Budget() {
             const spent = getCatSpent(cat)
             const diff = allocated - spent
             const pct = allocated > 0 ? Math.min((spent / allocated) * 100, 100) : 0
-            const catTxs = thisMonthTxs.filter(t => t.budgetCategory === cat.name && t.amount < 0)
+            const catTxs = thisMonthTxs.filter(t => t.budgetCategory === cat.id && t.amount < 0)
               .sort((a,b) => new Date(b.date)-new Date(a.date))
             const isOpen = expandedCat === cat.id
 
