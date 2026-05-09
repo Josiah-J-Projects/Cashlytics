@@ -5,6 +5,7 @@ import { DraggableList } from '../components/DraggableList.jsx'
 import { Wallet, Plus, ChevronDown, ChevronUp, Edit2, Trash2, TrendingUp, AlertCircle, ArrowUpRight, ArrowDownRight, ArrowRightLeft } from 'lucide-react'
 import { monthlyAmount } from '../store/index.js'
 import TransferModal from '../components/TransferModal.jsx'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 
 //check form fields
 function validate(form, type) {
@@ -226,6 +227,33 @@ export default function Accounts() {
   const cashAccounts = accounts.filter(a => ['Cash','Savings'].includes(a.category)).reduce((s,a) => s+(a.balance||0),0)
   const emergency = accounts.filter(a => a.category === 'Emergency').reduce((s,a) => s+(a.balance||0),0)
   const totalIncome = incomeStreams.reduce((s, i) => s + monthlyAmount(i), 0)
+  const nonEmergency = totalBalance - emergency
+
+  //set which view to show in the pie chart (assets vs emergency)
+  const [assetView, setAssetView] = useState('assets')
+  const assetPieData = assetView === 'assets'
+      ? [
+          { name: 'Hard Assets', value: hardAssets, color: '#8b5cf6' },
+          { name: 'Liquid Assets', value: cashAccounts, color: '#16a34a' },
+        ].filter(d => d.value > 0)
+      : [
+          { name: 'Emergency Funds', value: emergency, color: '#f59e0b' },
+          { name: 'Non-Emergency', value: nonEmergency, color: '#3b82f6' },
+        ].filter(d => d.value > 0)
+  
+    const assetPieTotal = assetPieData.reduce((s, d) => s + d.value, 0)
+  
+    const AssetPieTooltip = ({ active, payload }) => {
+      if (!active || !payload?.length) return null
+      const val = payload[0].value
+      const pct = assetPieTotal > 0 ? ((val / assetPieTotal) * 100).toFixed(1) : '0'
+      return (
+        <div style={{ background: 'var(--gray-900)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#fff' }}>
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>{payload[0].name}</div>
+          <div>{fmt(val)} <span style={{ opacity: 0.7 }}>({pct}%)</span></div>
+        </div>
+      )
+    }
 
    //open account modal
   const openAddAccount = () => { setEditingAccount(null); setAccountForm(EMPTY_A); setAccountErrors({}); setShowAccountModal(true) }
@@ -257,22 +285,53 @@ export default function Accounts() {
     <div className="page">
       {/*header*/}
       <div className="pageHeader">
-        <div><h1 className="pageTitle">Accounts</h1><div className="pageSubtitle">Manage your accounts and income streams</div></div>
-        <button className="btn btnPrimary btnSm" onClick={() => setShowTransferModal(true)}>
-                  <ArrowRightLeft size={14} /> Transfer Money
-                </button>
-      </div>
+      <div><h1 className="pageTitle">Accounts</h1><div className="pageSubtitle">Manage your accounts and income streams</div></div>
+      <button className="btn btnPrimary btnSm" onClick={() => setShowTransferModal(true)}>
+        <ArrowRightLeft size={14} /> Transfer Money
+      </button>
+    </div>
 
-      {/*stats*/}
-      <div className="statCards statCards3" style={{ marginBottom: 28 }}>
+     {/*stat toggle*/}
+    <div className="tabs" style={{ marginBottom: 14 }}>
+      <button className={`tab${assetView === 'assets' ? ' active' : ''}`} onClick={() => setAssetView('assets')}>Assets</button>
+      <button className={`tab${assetView === 'emergency' ? ' active' : ''}`} onClick={() => setAssetView('emergency')}>Emergency</button>
+    </div>
+
+    {/*stats*/}
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: 16, marginBottom: 28 }}>
+      <div className="statCards statCards2">
         <div className="statCard green"><div className="statLabel">Total Balance</div><div className="statValue">{fmt(totalBalance, true)}</div></div>
         <div className="statCard"><div className="statLabel">Est. Monthly Income</div><div className="statValue" style={{ color: 'var(--green-600)' }}>{fmt(totalIncome, true)}</div></div>
-        <div className="statCard"><div className="statLabel">Emergency Funds</div><div className="statValue">{fmt(emergency, true)}</div></div>
-        <div className="statCard"><div className="statLabel">Cash Assets</div><div className="statValue">{fmt(cashAccounts, true)}</div></div>
-        <div className="statCard"><div className="statLabel">Hard Assets</div><div className="statValue">{fmt(hardAssets, true)}</div></div>
-        <div className="statCard"><div className="statLabel">Non-Emergency</div><div className="statValue">{fmt(totalBalance - emergency, true)}</div></div>
+        {assetView === 'assets' ? (
+          <>
+            <div className="statCard"><div className="statLabel">Hard Assets</div><div className="statValue">{fmt(hardAssets, true)}</div><div style={{ fontSize: 12, color: 'var(--gray-400)', marginTop: 6 }}>{assetPieTotal > 0 ? ((hardAssets/assetPieTotal)*100).toFixed(1) : 0}% of assets</div></div>
+            <div className="statCard"><div className="statLabel">Liquid Assets</div><div className="statValue">{fmt(cashAccounts, true)}</div><div style={{ fontSize: 12, color: 'var(--gray-400)', marginTop: 6 }}>{assetPieTotal > 0 ? ((cashAccounts/assetPieTotal)*100).toFixed(1) : 0}% of assets</div></div>
+          </>
+        ) : (
+          <>
+            <div className="statCard"><div className="statLabel">Emergency Funds</div><div className="statValue">{fmt(emergency, true)}</div><div style={{ fontSize: 12, color: 'var(--gray-400)', marginTop: 6 }}>{assetPieTotal > 0 ? ((emergency/assetPieTotal)*100).toFixed(1) : 0}% of balance</div></div>
+            <div className="statCard"><div className="statLabel">Non-Emergency</div><div className="statValue">{fmt(nonEmergency, true)}</div><div style={{ fontSize: 12, color: 'var(--gray-400)', marginTop: 6 }}>{assetPieTotal > 0 ? ((nonEmergency/assetPieTotal)*100).toFixed(1) : 0}% of balance</div></div>
+          </>
+        )}
       </div>
 
+      {/*pie chart*/}
+      <div className="chartContainer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 12 }}>
+        <div className="cardTitle" style={{marginBottom: 8 }}>Breakdown</div>
+        {assetPieData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={180}>
+            <PieChart>
+              <Pie data={assetPieData} cx="50%" cy="50%" innerRadius={0} outerRadius={80} dataKey="value">
+                {assetPieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+              </Pie>
+              <Tooltip content={<AssetPieTooltip />} />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <div style={{ textAlign: 'center', color: 'var(--gray-400)', fontSize: 12 }}>No data</div>
+        )}
+      </div>
+    </div>
       
       {/*accounts section*/}
       <div className="sectionHeader">
