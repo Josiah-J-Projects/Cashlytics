@@ -13,7 +13,7 @@ export default function Transactions() {
   const [filterAccount, setFilterAccount] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
   const [filterType, setFilterType] = useState('')
-//find category name from stored id
+  //find category name from stored id
   const catName = (id) => budgetCategories.find(c => c.id === id)?.name || ''
 
   //combine regular and credit accounts into one list
@@ -44,9 +44,8 @@ export default function Transactions() {
     return Object.entries(groups).sort((a,b) => new Date(b[0]) - new Date(a[0]))
   }, [filtered])
 
-  //calculate totals
-  const totalIncome = filtered.filter(t => t.amount > 0).reduce((s,t) => s + t.amount, 0)
-  const totalExpenses = filtered.filter(t => t.amount < 0).reduce((s,t) => s + Math.abs(t.amount), 0)
+  const totalIncome = filtered.filter(t => !t.isTransfer && t.amount > 0).reduce((s,t) => s + t.amount, 0)
+  const totalExpenses = filtered.filter(t => !t.isTransfer && t.amount < 0).reduce((s,t) => s + Math.abs(t.amount), 0)
 
   return (
     <div className="page">
@@ -60,7 +59,7 @@ export default function Transactions() {
 
       {/* overall stats */}
       <div className="statCards statCards3" style={{ marginBottom: 20 }}>
-        <div className="statCard"><div className="statLabel">Net Income</div><div className="statValue">{fmt(totalIncome - totalExpenses, true)}</div></div>
+        <div className="statCard"><div className="statLabel">Net Cashflow</div><div className="statValue">{fmt(totalIncome - totalExpenses, true)}</div></div>
         <div className="statCard"><div className="statLabel">Income</div><div className="statValue" style={{ color: 'var(--green-600)' }}>{fmt(totalIncome, true)}</div></div>
         <div className="statCard"><div className="statLabel">Expenses</div><div className="statValue" style={{ color: 'var(--red-500)' }}>{fmt(totalExpenses, true)}</div></div>
       </div>

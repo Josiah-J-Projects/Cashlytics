@@ -23,6 +23,18 @@ function ChartTooltip({ active, payload, label }) {
   )
 }
 
+function PieTooltip({ active, payload, total }) {
+  if (!active || !payload?.length) return null
+  const val = payload[0].value
+  const pct = total > 0 ? ((val / total) * 100).toFixed(1) : '0'
+  return (
+    <div className="customTooltip">
+      <div style={{ fontWeight: 600, marginBottom: 4 }}>{payload[0].name}</div>
+      <div>{fmt(val)} <span style={{ opacity: 0.7 }}>({pct}%)</span></div>
+    </div>
+  )
+}
+
 export default function Home() {
   const navigate = useNavigate()
   //global state
@@ -43,7 +55,7 @@ export default function Home() {
     const start = startOfMonth(d)
     const end = endOfMonth(d)
     const monthTxs = transactions.filter(t => {
-      try { return isWithinInterval(parseISO(t.date), { start, end }) } catch { return false }
+      try { return !t.isTransfer && isWithinInterval(parseISO(t.date), { start, end }) } catch { return false }
     })
     const income = monthTxs.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0)
     const expense = monthTxs.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0)
@@ -151,7 +163,7 @@ export default function Home() {
                 <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} dataKey="value" paddingAngle={2}>
                   {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                 </Pie>
-                <Tooltip formatter={(v) => fmt(v)} />
+                <Tooltip content={<PieTooltip total={pieData.reduce((s,p)=>s+p.value,0)} />} />
                 <Legend iconType="circle" iconSize={8} formatter={v => <span style={{ fontSize: 11 }}>{v}</span>} />
               </PieChart>
             </ResponsiveContainer>
