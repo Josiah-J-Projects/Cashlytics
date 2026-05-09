@@ -11,7 +11,9 @@ Cashlytics is a personal finance tracker that lets you manage accounts, track in
 
 
 ## How To Use
-Go to **[josiah-j-projects.github.io/Cashlytics](https://josiah-j-projects.github.io/Cashlytics/)**
+**Start with Blank Page:** [josiah-j-projects.github.io/Cashlytics](https://josiah-j-projects.github.io/Cashlytics/)
+
+**Start with Prefilled Values:** [Demo Version](https://josiah-j-projects.github.io/Cashlytics/?demo)
 
 ## Features
 

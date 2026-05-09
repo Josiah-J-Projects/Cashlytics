@@ -10,6 +10,7 @@ import Budget from './pages/Budget.jsx'
 import Transactions from './pages/Transactions.jsx'
 import CalendarPage from './pages/Calendar.jsx'
 import { useStore } from './store/index.js'
+import { maybeLoadDemo } from './demo/loadDemo.js'
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -35,6 +36,10 @@ function Layout() {
 }
 
 export default function App() {
+  const { importState } = useStore()
+    useEffect(() => {
+      maybeLoadDemo(importState)
+    }, [])
   return (
     <AppProvider>
       <Layout />
