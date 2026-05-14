@@ -86,8 +86,13 @@ export function getOccurrencesBetween(stream, afterDate, beforeDate) {
   return results
 }
 
+//check if app isinstalled
+const isInstalled = () =>
+  window.matchMedia('(display-mode: standalone)').matches ||
+  window.navigator.standalone === true
+
 //global app state (accounts, transactions, etc.)
-export const useStore = create((set, get) => ({
+const storeDefinition = (set, get) => ({
       accounts: [],
       incomeStreams: [],
       creditAccounts: [],
@@ -426,7 +431,10 @@ export const useStore = create((set, get) => ({
         set(base)
       },
     })
-)
+//Only persist data if app is installed
+export const useStore = isInstalled()
+  ? create(persist(storeDefinition, { name: 'cashlytics_v0.8.0' }))
+  : create(storeDefinition)
 
 //helpers for fotmatting and calculations
 export const fmt = (n, compact = false) => {
