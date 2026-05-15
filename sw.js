@@ -3,7 +3,7 @@ const CACHE = 'cashlytics_v0.8.0'
 //install the app
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(['/']))
+    caches.open(CACHE).then(cache => cache.addAll(['/Cashlytics/']))
   )
   self.skipWaiting()
 })
