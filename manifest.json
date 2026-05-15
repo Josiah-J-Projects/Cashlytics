@@ -2,7 +2,7 @@
   "name": "Cashlytics",
   "short_name": "Cashlytics",
   "description": "Cashlytics is a personal finance tracker that lets you manage accounts, track income and expense streams, set budgets, log transactions, and view upcoming events.",
-  "start_url": "./index.html",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#16a34a",
